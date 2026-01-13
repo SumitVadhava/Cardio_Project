@@ -4,7 +4,7 @@ import { PredictionInput, PredictionResult, MLMetrics, HistoryFilters, Paginated
 import { savePrediction, getAllPredictions, getPrediction as getStoredPrediction, deletePrediction as deleteStoredPrediction, migrateFromLocalStorage } from './storage';
 
 // FastAPI backend URL - deployed on Render
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cardio-project-nr6y.onrender.com';
+const API_BASE_URL = 'https://cardio-project-nr6y.onrender.com';
 
 // Transform frontend form data to backend schema
 interface BackendPredictionInput {
@@ -419,5 +419,6 @@ class ApiClient {
     return new Blob([csv], { type: 'text/csv' });
   }
 }
+
 
 export const api = new ApiClient(API_BASE_URL);
