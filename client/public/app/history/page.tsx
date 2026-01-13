@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
@@ -9,6 +8,7 @@ import { PageLoader, SkeletonTable } from '../../components/ui/LoadingSpinner';
 import { ConfirmModal } from '../../components/ui/Modal';
 import { Download, Trash2, Filter, Calendar, AlertTriangle } from 'lucide-react';
 import { formatDateTime, getRiskColor, getRiskBgColor, downloadBlob } from '../../lib/utils';
+import { PredictionResult } from '../../types';
 import toast from 'react-hot-toast';
 
 export default function HistoryPage() {
@@ -116,7 +116,7 @@ export default function HistoryPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700/50">
-                {data.data.map((prediction, index) => (
+                {data.data.map((prediction: PredictionResult, index: number) => (
                   <tr 
                     key={prediction.id} 
                     className="hover:bg-background-hover transition-colors animate-fadeIn"
