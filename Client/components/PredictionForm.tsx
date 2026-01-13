@@ -191,6 +191,60 @@ function AnimatedSwitch({
   );
 }
 
+interface AnimatedSelectProps {
+  label: string;
+  options: { value: string; label: string }[];
+  error?: string;
+  required?: boolean;
+  [key: string]: any;
+}
+
+function AnimatedSelect({ label, options, error, required, ...props }: AnimatedSelectProps) {
+  return (
+    <motion.div variants={itemVariants}>
+      <label className="block text-sm font-medium text-slate-300 mb-2">
+        {label}
+        {required && <span className="text-rose-400 ml-1">*</span>}
+      </label>
+      <select
+        {...props}
+        className={`
+          w-full px-4 py-3 bg-slate-800/50 border-2 rounded-xl
+          text-slate-100 appearance-none cursor-pointer
+          transition-all duration-300 ease-out
+          focus:outline-none focus:ring-0
+          ${error 
+            ? 'border-rose-500/50 focus:border-rose-500' 
+            : 'border-slate-700/50 focus:border-cyan-500/70 hover:border-slate-600'
+          }
+        `}
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'right 12px center',
+          backgroundSize: '20px',
+        }}
+      >
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value} className="bg-slate-800">
+            {opt.label}
+          </option>
+        ))}
+      </select>
+      {error && (
+        <motion.p
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-1.5 text-xs text-rose-400 flex items-center gap-1"
+        >
+          <AlertCircle className="h-3 w-3" />
+          {error}
+        </motion.p>
+      )}
+    </motion.div>
+  );
+}
+
 // Section Header Component
 interface SectionHeaderProps {
   number: number;
@@ -706,4 +760,5 @@ export function PredictionForm() {
     </>
   );
 }
+
 
