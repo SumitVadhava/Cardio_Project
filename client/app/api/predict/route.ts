@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
-    const BACKEND_URL = 'https://cardio-vascular-backend.onrender.com';
+    const BACKEND_URL = 'https://cardio-project-nr6y.onrender.com';
 
     try {
         // Get the request body
@@ -38,3 +38,4 @@ export async function POST(request: NextRequest) {
         );
     }
 }
+
