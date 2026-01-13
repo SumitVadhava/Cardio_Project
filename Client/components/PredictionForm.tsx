@@ -191,6 +191,232 @@ function AnimatedSwitch({
   );
 }
 
+// Section Header Component
+interface SectionHeaderProps {
+  number: number;
+  title: string;
+  icon: React.ReactNode;
+}
+
+function SectionHeader({ number, title, icon }: SectionHeaderProps) {
+  return (
+    <motion.div 
+      variants={itemVariants}
+      className="flex items-center gap-3 mb-5"
+    >
+      <motion.div 
+        className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30"
+        whileHover={{ scale: 1.1, rotate: 5 }}
+      >
+        <span className="text-sm font-bold text-cyan-400">{number}</span>
+      </motion.div>
+      <div className="flex items-center gap-2">
+        {icon}
+        <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
+          {title}
+        </h3>
+      </div>
+      <div className="flex-1 h-px bg-gradient-to-r from-slate-700 to-transparent" />
+    </motion.div>
+  );
+}
+
+interface ResultModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  result: PredictionResult | null;
+}
+
+function ResultModal({ isOpen, onClose, result }: ResultModalProps) {
+  return (
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-slate-900 border border-slate-700/50 shadow-2xl transition-all">
+                {/* Header */}
+                <div className="relative px-6 py-5 bg-gradient-to-r from-cyan-500/10 via-slate-900 to-blue-500/10 border-b border-slate-700/50">
+                  <Dialog.Title className="text-xl font-bold text-slate-100 flex items-center gap-3">
+                    <motion.div
+                      initial={{ rotate: 0 }}
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
+                      className="p-2 bg-cyan-500/20 rounded-xl"
+                    >
+                      <Activity className="h-5 w-5 text-cyan-400" />
+                    </motion.div>
+                    Risk Assessment Result
+                  </Dialog.Title>
+                  <button
+                    onClick={onClose}
+                    className="absolute right-4 top-4 p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                {/* Content */}
+                {result && (
+                  <motion.div 
+                    className="p-6 space-y-6"
+                    initial="hidden"
+                    animate="visible"
+                    variants={containerVariants}
+                  >
+                    {/* Risk Gauge */}
+                    <motion.div variants={itemVariants} className="py-4">
+                      <RiskGauge score={result.riskScore} level={result.riskLevel} />
+                    </motion.div>
+
+                    {/* Quick Stats */}
+                    <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4">
+                      {[
+                        { 
+                          value: `${result.riskScore}%`, 
+                          label: '10-Year Risk',
+                          color: 'text-cyan-400'
+                        },
+                        { 
+                          value: result.riskLevel, 
+                          label: 'Risk Level',
+                          color: result.riskLevel === 'low' ? 'text-emerald-400' :
+                                 result.riskLevel === 'medium' ? 'text-amber-400' : 'text-rose-400'
+                        },
+                        { 
+                          value: result.modelVersion, 
+                          label: 'Model Version',
+                          color: 'text-blue-400'
+                        },
+                      ].map((stat, idx) => (
+                        <motion.div
+                          key={idx}
+                          className="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50 text-center"
+                          whileHover={{ scale: 1.02, y: -2 }}
+                        >
+                          <div className={`text-2xl font-bold capitalize ${stat.color}`}>
+                            {stat.value}
+                          </div>
+                          <div className="text-xs text-slate-500 mt-1">{stat.label}</div>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+
+                    {/* Recommendations */}
+                    {result.recommendations && result.recommendations.length > 0 && (
+                      <motion.div 
+                        variants={itemVariants}
+                        className="p-5 bg-emerald-500/5 rounded-xl border border-emerald-500/20"
+                      >
+                        <h4 className="text-base font-semibold text-emerald-400 mb-3 flex items-center gap-2">
+                          <CheckCircle2 className="h-5 w-5" />
+                          Recommendations
+                        </h4>
+                        <ul className="space-y-2">
+                          {result.recommendations.map((rec, idx) => (
+                            <motion.li 
+                              key={idx}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: idx * 0.1 }}
+                              className="flex items-start gap-3 text-sm text-slate-300"
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 flex-shrink-0" />
+                              {rec}
+                            </motion.li>
+                          ))}
+                        </ul>
+                      </motion.div>
+                    )}
+
+                    {/* Risk Factors */}
+                    {result.factors && result.factors.length > 0 && (
+                      <motion.div variants={itemVariants}>
+                        <h4 className="text-base font-semibold text-slate-200 mb-3 flex items-center gap-2">
+                          <ShieldAlert className="h-5 w-5 text-amber-400" />
+                          Contributing Risk Factors
+                        </h4>
+                        <div className="space-y-3">
+                          {result.factors.map((factor, idx) => (
+                            <motion.div
+                              key={idx}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: idx * 0.1 }}
+                              className="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50"
+                            >
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-sm font-medium text-slate-200">{factor.name}</span>
+                                <span className={`text-sm font-bold ${
+                                  factor.impact > 20 ? 'text-rose-400' :
+                                  factor.impact > 10 ? 'text-amber-400' : 'text-emerald-400'
+                                }`}>
+                                  +{factor.impact}%
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-500 mb-2">{factor.description}</p>
+                              <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                                <motion.div 
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${Math.min(factor.impact * 3, 100)}%` }}
+                                  transition={{ duration: 0.8, delay: idx * 0.1 }}
+                                  className={`h-full rounded-full ${
+                                    factor.impact > 20 ? 'bg-rose-500' :
+                                    factor.impact > 10 ? 'bg-amber-500' : 'bg-emerald-500'
+                                  }`}
+                                />
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Close Button */}
+                    <motion.button
+                      variants={itemVariants}
+                      onClick={onClose}
+                      className="w-full py-3 px-4 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold rounded-xl
+                        hover:from-cyan-400 hover:to-blue-400 transition-all duration-300
+                        focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-2 focus:ring-offset-slate-900
+                        flex items-center justify-center gap-2"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Heart className="h-5 w-5" />
+                      Close & Start New Assessment
+                    </motion.button>
+                  </motion.div>
+                )}
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
+  );
+}
+
 /* -------------------- Main Component -------------------- */
 
 export function PredictionForm() {
@@ -480,3 +706,4 @@ export function PredictionForm() {
     </>
   );
 }
+
