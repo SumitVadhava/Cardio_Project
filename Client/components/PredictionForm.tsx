@@ -201,10 +201,10 @@ export function PredictionForm() {
   const {
     register,
     handleSubmit,
-    control,
-    reset,
     formState: { errors },
-  } = useForm<PredictionFormData>({
+    reset,
+    control,
+  } = useForm<PredictionFormData>({ 
     resolver: zodResolver(predictionSchema),
     defaultValues: {
       gender: 'male',
@@ -220,123 +220,263 @@ export function PredictionForm() {
       setResult(data);
       setShowResult(true);
       queryClient.invalidateQueries({ queryKey: ['predictions'] });
-      toast.success('Risk assessment completed!');
+      toast.success('Risk assessment completed!', {
+        icon: '🎯',
+        style: {
+          background: '#1e293b',
+          color: '#f1f5f9',
+          border: '1px solid #334155',
+          borderRadius: '12px',
+        },
+      });
+    },
+    onError: (error: Error) => {
+      console.error('Prediction error:', error);
+      toast.error('Failed to generate prediction. Please check if the backend is running.', {
+        style: {
+          background: '#1e293b',
+          color: '#f1f5f9',
+          border: '1px solid #334155',
+          borderRadius: '12px',
+        },
+      });
     },
   });
 
+  const onSubmit = (data: PredictionFormData) => {
+    mutation.mutate(data);
+  };
+
+  const handleCloseModal = () => {
+    setShowResult(false);
+    reset();
+  };
+
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={cardVariants}
-      className="bg-slate-900/80 rounded-2xl border border-slate-700 p-6"
-    >
-      <form onSubmit={handleSubmit((data) => mutation.mutate(data))}>
-        <motion.div variants={containerVariants} className="space-y-6">
-
-          {/* Age */}
-          <AnimatedInput
-            label="Age"
-            type="number"
-            {...register('age', { valueAsNumber: true })}
-            error={errors.age?.message}
-            required
-          />
-
-          {/* Gender */}
-          <select
-            {...register('gender')}
-            className="w-full px-4 py-3 bg-slate-800/50 border-2 border-slate-700 rounded-xl text-slate-100"
+    <>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={cardVariants}
+        className="bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-slate-700/50 shadow-2xl overflow-hidden"
+      >
+        {/* Form Header */}
+        <div className="relative px-6 py-6 bg-gradient-to-r from-cyan-500/10 via-slate-900/50 to-blue-500/10 border-b border-slate-700/50">
+          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
+          <motion.div 
+            className="relative flex items-center gap-4"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
           >
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-          </select>
+            <motion.div 
+              className="p-3 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-xl border border-cyan-500/30"
+              whileHover={{ scale: 1.1, rotate: 5 }}
+            >
+              <Stethoscope className="h-7 w-7 text-cyan-400" />
+            </motion.div>
+            <div>
+              <h2 className="text-2xl font-bold text-slate-100">Risk Assessment</h2>
+              <p className="text-slate-400 text-sm mt-0.5">
+                Enter patient information to calculate cardiovascular risk
+              </p>
+            </div>
+          </motion.div>
+        </div>
 
-          {/* Cholesterol */}
-          <AnimatedInput
-            label="Cholesterol"
-            type="number"
-            {...register('cholesterol', { valueAsNumber: true })}
-            error={errors.cholesterol?.message}
-            required
-          />
-
-          {/* BP */}
-          <AnimatedInput
-            label="Systolic BP"
-            type="number"
-            {...register('bloodPressureSystolic', { valueAsNumber: true })}
-            error={errors.bloodPressureSystolic?.message}
-            required
-          />
-
-          <AnimatedInput
-            label="Diastolic BP"
-            type="number"
-            {...register('bloodPressureDiastolic', { valueAsNumber: true })}
-            error={errors.bloodPressureDiastolic?.message}
-            required
-          />
-
-          {/* Switches */}
-          <Controller
-            name="smoking"
-            control={control}
-            render={({ field }) => (
-              <AnimatedSwitch
-                label="Smoker"
-                checked={field.value ?? false}
-                onChange={field.onChange}
-              />
-            )}
-          />
-
-          <Controller
-            name="diabetes"
-            control={control}
-            render={({ field }) => (
-              <AnimatedSwitch
-                label="Diabetes"
-                checked={field.value ?? false}
-                onChange={field.onChange}
-              />
-            )}
-          />
-
-          <Controller
-            name="familyHistory"
-            control={control}
-            render={({ field }) => (
-              <AnimatedSwitch
-                label="Family History"
-                checked={field.value ?? false}
-                onChange={field.onChange}
-              />
-            )}
-          />
-
-          {/* Actions */}
-          <motion.button
-            type="submit"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl"
+        {/* Form Content */}
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+            className="space-y-8"
           >
-            Calculate Risk
-          </motion.button>
+            {/* Basic Information Section */}
+            <div>
+              <SectionHeader 
+                number={1} 
+                title="Basic Information" 
+                icon={<User className="h-4 w-4 text-slate-500" />}
+              />
+              <motion.div 
+                variants={containerVariants}
+                className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              >
+                <AnimatedInput
+                  label="Age"
+                  type="number"
+                  {...register('age', { valueAsNumber: true })}
+                  error={errors.age?.message}
+                  helpText="Patient's age in years (18-120)"
+                  required
+                />
+                <AnimatedSelect
+                  label="Gender"
+                  {...register('gender')}
+                  error={errors.gender?.message}
+                  options={[
+                    { value: 'male', label: 'Male' },
+                    { value: 'female', label: 'Female' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                  required
+                />
+              </motion.div>
+            </div>
 
-          <motion.button
-            type="button"
-            onClick={() => reset()}
-            className="w-full py-3 bg-slate-800 text-slate-300 rounded-xl"
-          >
-            <RotateCcw className="inline h-4 w-4 mr-2" />
-            Reset
-          </motion.button>
+            {/* Clinical Measurements Section */}
+            <div>
+              <SectionHeader 
+                number={2} 
+                title="Clinical Measurements" 
+                icon={<Gauge className="h-4 w-4 text-slate-500" />}
+              />
+              <motion.div 
+                variants={containerVariants}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+              >
+                <AnimatedInput
+                  label="Total Cholesterol"
+                  type="number"
+                  {...register('cholesterol', { valueAsNumber: true })}
+                  error={errors.cholesterol?.message}
+                  helpText="mg/dL (Normal: <200)"
+                  required
+                />
+                <AnimatedInput
+                  label="Systolic BP"
+                  type="number"
+                  {...register('bloodPressureSystolic', { valueAsNumber: true })}
+                  error={errors.bloodPressureSystolic?.message}
+                  helpText="mmHg (Normal: <120)"
+                  required
+                />
+                <AnimatedInput
+                  label="Diastolic BP"
+                  type="number"
+                  {...register('bloodPressureDiastolic', { valueAsNumber: true })}
+                  error={errors.bloodPressureDiastolic?.message}
+                  helpText="mmHg (Normal: <80)"
+                  required
+                />
+                <AnimatedInput
+                  label="BMI"
+                  type="number"
+                  step="0.1"
+                  {...register('bmi', { valueAsNumber: true })}
+                  error={errors.bmi?.message}
+                  helpText="kg/m² (Normal: 18.5-24.9)"
+                />
+              </motion.div>
+            </div>
 
-        </motion.div>
-      </form>
-    </motion.div>
+            {/* Risk Factors Section */}
+            <div>
+              <SectionHeader 
+                number={3} 
+                title="Risk Factors" 
+                icon={<ShieldAlert className="h-4 w-4 text-slate-500" />}
+              />
+              <motion.div 
+                variants={containerVariants}
+                className="grid grid-cols-1 md:grid-cols-3 gap-4"
+              >
+                <Controller
+                  name="smoking"
+                  control={control}
+                  render={({ field }) => (
+                    <AnimatedSwitch
+                      label="Smoker"
+                      description="Current or former smoker"
+                      checked={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
+                <Controller
+                  name="diabetes"
+                  control={control}
+                  render={({ field }) => (
+                    <AnimatedSwitch
+                      label="Diabetes"
+                      description="Type 1 or Type 2 diabetes"
+                      checked={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
+                <Controller
+                  name="familyHistory"
+                  control={control}
+                  render={({ field }) => (
+                    <AnimatedSwitch
+                      label="Family History"
+                      description="CVD in first-degree relatives"
+                      checked={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
+              </motion.div>
+            </div>
+
+            {/* Action Buttons */}
+            <motion.div 
+              variants={itemVariants}
+              className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-slate-700/50"
+            >
+              <motion.button
+                type="button"
+                onClick={() => reset()}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-slate-800 text-slate-300 font-medium rounded-xl
+                  border border-slate-700 hover:bg-slate-700 hover:text-slate-100 transition-all duration-300
+                  focus:outline-none focus:ring-2 focus:ring-slate-500/50"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <RotateCcw className="h-4 w-4" />
+                Reset Form
+              </motion.button>
+              <motion.button
+                type="submit"
+                disabled={mutation.isPending}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 
+                  bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold rounded-xl
+                  hover:from-cyan-400 hover:to-blue-400 transition-all duration-300
+                  focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-2 focus:ring-offset-slate-900
+                  disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={{ scale: mutation.isPending ? 1 : 1.02 }}
+                whileTap={{ scale: mutation.isPending ? 1 : 0.98 }}
+              >
+                {mutation.isPending ? (
+                  <>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    >
+                      <Activity className="h-5 w-5" />
+                    </motion.div>
+                    Calculating...
+                  </>
+                ) : (
+                  <>
+                    <TrendingUp className="h-5 w-5" />
+                    Calculate Risk Score
+                  </>
+                )}
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        </form>
+      </motion.div>
+
+      {/* Result Modal */}
+      <ResultModal
+        isOpen={showResult}
+        onClose={handleCloseModal}
+        result={result}
+      />
+    </>
   );
 }
