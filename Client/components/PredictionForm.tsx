@@ -33,10 +33,7 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
-    },
+    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
   },
 };
 
@@ -64,7 +61,6 @@ const cardVariants = {
       damping: 20,
     },
   },
-  exit: { opacity: 0, scale: 0.95 },
 };
 
 /* -------------------- Inputs -------------------- */
@@ -102,12 +98,12 @@ function AnimatedInput({
           {...props}
           type={type}
           step={step}
+          whileFocus={{ scale: 1.01 }}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          whileFocus={{ scale: 1.01 }}
-          className={`w-full px-4 py-3 rounded-xl bg-slate-800/50 border-2 text-slate-100
+          className={`w-full px-4 py-3 bg-slate-800/50 border-2 rounded-xl
             ${error ? 'border-rose-500' : 'border-slate-700 focus:border-cyan-500'}
-          `}
+            text-slate-100`}
         />
 
         <AnimatePresence>
@@ -160,7 +156,7 @@ function AnimatedSwitch({
   return (
     <motion.div variants={itemVariants}>
       <Switch.Group>
-        <div className="p-4 rounded-xl border border-slate-700 bg-slate-800/50">
+        <div className="p-4 rounded-xl border border-slate-700 bg-slate-800/40">
           <div className="flex items-center justify-between">
             <div>
               <Switch.Label className="text-sm font-medium text-slate-200">
@@ -174,7 +170,7 @@ function AnimatedSwitch({
             <Switch
               checked={checked}
               onChange={onChange}
-              className={`relative inline-flex h-6 w-11 rounded-full transition
+              className={`relative inline-flex h-6 w-11 rounded-full
                 ${checked ? 'bg-cyan-500' : 'bg-slate-600'}`}
             >
               <motion.span
@@ -184,7 +180,7 @@ function AnimatedSwitch({
                   stiffness: 500,
                   damping: 30,
                 }}
-                className={`inline-block h-4 w-4 bg-white rounded-full transform
+                className={`inline-block h-4 w-4 bg-white rounded-full
                   ${checked ? 'translate-x-6' : 'translate-x-1'}`}
               />
             </Switch>
@@ -195,7 +191,7 @@ function AnimatedSwitch({
   );
 }
 
-/* -------------------- Main Form -------------------- */
+/* -------------------- Main Component -------------------- */
 
 export function PredictionForm() {
   const [showResult, setShowResult] = useState(false);
@@ -230,14 +226,15 @@ export function PredictionForm() {
 
   return (
     <motion.div
-      variants={cardVariants}
       initial="hidden"
       animate="visible"
-      className="rounded-2xl border border-slate-700 bg-slate-900/80 p-6"
+      variants={cardVariants}
+      className="bg-slate-900/80 rounded-2xl border border-slate-700 p-6"
     >
       <form onSubmit={handleSubmit((data) => mutation.mutate(data))}>
         <motion.div variants={containerVariants} className="space-y-6">
 
+          {/* Age */}
           <AnimatedInput
             label="Age"
             type="number"
@@ -246,33 +243,93 @@ export function PredictionForm() {
             required
           />
 
+          {/* Gender */}
+          <select
+            {...register('gender')}
+            className="w-full px-4 py-3 bg-slate-800/50 border-2 border-slate-700 rounded-xl text-slate-100"
+          >
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+
+          {/* Cholesterol */}
+          <AnimatedInput
+            label="Cholesterol"
+            type="number"
+            {...register('cholesterol', { valueAsNumber: true })}
+            error={errors.cholesterol?.message}
+            required
+          />
+
+          {/* BP */}
+          <AnimatedInput
+            label="Systolic BP"
+            type="number"
+            {...register('bloodPressureSystolic', { valueAsNumber: true })}
+            error={errors.bloodPressureSystolic?.message}
+            required
+          />
+
+          <AnimatedInput
+            label="Diastolic BP"
+            type="number"
+            {...register('bloodPressureDiastolic', { valueAsNumber: true })}
+            error={errors.bloodPressureDiastolic?.message}
+            required
+          />
+
+          {/* Switches */}
           <Controller
-            name="familyHistory"
+            name="smoking"
             control={control}
             render={({ field }) => (
               <AnimatedSwitch
-                label="Family History"
-                description="CVD in first-degree relatives"
+                label="Smoker"
                 checked={field.value ?? false}
                 onChange={field.onChange}
               />
             )}
           />
 
+          <Controller
+            name="diabetes"
+            control={control}
+            render={({ field }) => (
+              <AnimatedSwitch
+                label="Diabetes"
+                checked={field.value ?? false}
+                onChange={field.onChange}
+              />
+            )}
+          />
+
+          <Controller
+            name="familyHistory"
+            control={control}
+            render={({ field }) => (
+              <AnimatedSwitch
+                label="Family History"
+                checked={field.value ?? false}
+                onChange={field.onChange}
+              />
+            )}
+          />
+
+          {/* Actions */}
           <motion.button
             type="submit"
-            disabled={mutation.isPending}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
+            className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl"
           >
-            {mutation.isPending ? 'Calculating...' : 'Calculate Risk'}
+            Calculate Risk
           </motion.button>
 
           <motion.button
             type="button"
             onClick={() => reset()}
-            className="w-full py-3 rounded-xl bg-slate-800 text-slate-300"
+            className="w-full py-3 bg-slate-800 text-slate-300 rounded-xl"
           >
             <RotateCcw className="inline h-4 w-4 mr-2" />
             Reset
