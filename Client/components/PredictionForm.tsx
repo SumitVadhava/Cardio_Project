@@ -103,7 +103,7 @@ function AnimatedInput({
           onBlur={() => setIsFocused(false)}
           className={`w-full px-4 py-3 bg-slate-800/50 border-2 rounded-xl
             ${error ? 'border-rose-500' : 'border-slate-700 focus:border-cyan-500'}
-            text-slate-100`}
+            text-slate-100 transition-all duration-300 focus:outline-none focus:ring-0`}
         />
 
         <AnimatePresence>
@@ -138,58 +138,7 @@ function AnimatedInput({
   );
 }
 
-/* -------------------- Switch -------------------- */
-
-interface AnimatedSwitchProps {
-  label: string;
-  description?: string;
-  checked: boolean;
-  onChange: (value: boolean) => void;
-}
-
-function AnimatedSwitch({
-  label,
-  description,
-  checked,
-  onChange,
-}: AnimatedSwitchProps) {
-  return (
-    <motion.div variants={itemVariants}>
-      <Switch.Group>
-        <div className="p-4 rounded-xl border border-slate-700 bg-slate-800/40">
-          <div className="flex items-center justify-between">
-            <div>
-              <Switch.Label className="text-sm font-medium text-slate-200">
-                {label}
-              </Switch.Label>
-              {description && (
-                <p className="text-xs text-slate-500">{description}</p>
-              )}
-            </div>
-
-            <Switch
-              checked={checked}
-              onChange={onChange}
-              className={`relative inline-flex h-6 w-11 rounded-full
-                ${checked ? 'bg-cyan-500' : 'bg-slate-600'}`}
-            >
-              <motion.span
-                layout
-                transition={{
-                  type: 'spring' as const,
-                  stiffness: 500,
-                  damping: 30,
-                }}
-                className={`inline-block h-4 w-4 bg-white rounded-full
-                  ${checked ? 'translate-x-6' : 'translate-x-1'}`}
-              />
-            </Switch>
-          </div>
-        </div>
-      </Switch.Group>
-    </motion.div>
-  );
-}
+/* -------------------- Select -------------------- */
 
 interface AnimatedSelectProps {
   label: string;
@@ -199,7 +148,13 @@ interface AnimatedSelectProps {
   [key: string]: any;
 }
 
-function AnimatedSelect({ label, options, error, required, ...props }: AnimatedSelectProps) {
+function AnimatedSelect({ 
+  label, 
+  options, 
+  error, 
+  required, 
+  ...props 
+}: AnimatedSelectProps) {
   return (
     <motion.div variants={itemVariants}>
       <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -215,7 +170,7 @@ function AnimatedSelect({ label, options, error, required, ...props }: AnimatedS
           focus:outline-none focus:ring-0
           ${error 
             ? 'border-rose-500/50 focus:border-rose-500' 
-            : 'border-slate-700/50 focus:border-cyan-500/70 hover:border-slate-600'
+            : 'border-slate-700 focus:border-cyan-500 hover:border-slate-600'
           }
         `}
         style={{
@@ -245,7 +200,61 @@ function AnimatedSelect({ label, options, error, required, ...props }: AnimatedS
   );
 }
 
-// Section Header Component
+/* -------------------- Switch -------------------- */
+
+interface AnimatedSwitchProps {
+  label: string;
+  description?: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}
+
+function AnimatedSwitch({
+  label,
+  description,
+  checked,
+  onChange,
+}: AnimatedSwitchProps) {
+  return (
+    <motion.div variants={itemVariants}>
+      <Switch.Group>
+        <div className="p-4 rounded-xl border border-slate-700 bg-slate-800/40">
+          <div className="flex items-center justify-between">
+            <div>
+              <Switch.Label className="text-sm font-medium text-slate-200">
+                {label}
+              </Switch.Label>
+              {description && (
+                <p className="text-xs text-slate-500 mt-0.5">{description}</p>
+              )}
+            </div>
+
+            <Switch
+              checked={checked}
+              onChange={onChange}
+              className={`relative inline-flex h-6 w-11 rounded-full transition-colors
+                ${checked ? 'bg-cyan-500' : 'bg-slate-600'}`}
+            >
+              <motion.span
+                layout
+                transition={{
+                  type: 'spring' as const,
+                  stiffness: 500,
+                  damping: 30,
+                }}
+                className={`inline-block h-4 w-4 my-1 bg-white rounded-full transition-transform
+                  ${checked ? 'translate-x-6' : 'translate-x-1'}`}
+              />
+            </Switch>
+          </div>
+        </div>
+      </Switch.Group>
+    </motion.div>
+  );
+}
+
+/* -------------------- Section Header -------------------- */
+
 interface SectionHeaderProps {
   number: number;
   title: string;
@@ -274,6 +283,8 @@ function SectionHeader({ number, title, icon }: SectionHeaderProps) {
     </motion.div>
   );
 }
+
+/* -------------------- Result Modal -------------------- */
 
 interface ResultModalProps {
   isOpen: boolean;
@@ -760,5 +771,3 @@ export function PredictionForm() {
     </>
   );
 }
-
-
