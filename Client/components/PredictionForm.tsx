@@ -680,7 +680,7 @@ export function PredictionForm() {
                     <AnimatedSwitch
                       label="Smoker"
                       description="Current or former smoker"
-                      checked={field.value}
+                      checked={field.value ?? false}
                       onChange={field.onChange}
                     />
                   )}
@@ -692,7 +692,7 @@ export function PredictionForm() {
                     <AnimatedSwitch
                       label="Diabetes"
                       description="Type 1 or Type 2 diabetes"
-                      checked={field.value}
+                      checked={field.value ?? false}
                       onChange={field.onChange}
                     />
                   )}
@@ -704,7 +704,7 @@ export function PredictionForm() {
                     <AnimatedSwitch
                       label="Family History"
                       description="CVD in first-degree relatives"
-                      checked={field.value}
+                      checked={field.value ?? false}
                       onChange={field.onChange}
                     />
                   )}
@@ -771,3 +771,4 @@ export function PredictionForm() {
     </>
   );
 }
+
