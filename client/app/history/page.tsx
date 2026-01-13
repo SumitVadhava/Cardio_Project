@@ -20,7 +20,7 @@ import {
   getRiskBgColor,
   downloadBlob,
 } from '../../lib/utils';
-import { PredictionResult } from '../../types';
+import { PredictionResult } from '@/types';
 import toast from 'react-hot-toast';
 
 /* ✅ API response type */
@@ -205,3 +205,4 @@ export default function HistoryPage() {
     </div>
   );
 }
+
